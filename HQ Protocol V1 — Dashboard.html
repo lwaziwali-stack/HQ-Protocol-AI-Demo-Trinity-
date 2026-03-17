@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HQ Protocol V1 — Dashboard</title>
+  <style>
+    :root {
+      --bg:         #0f0f13;
+      --surface:    #1a1a22;
+      --border:     #2a2a38;
+      --accent:     #7c5cfc;
+      --accent2:    #00d4aa;
+      --green:      #22c55e;
+      --red:        #ef4444;
+      --yellow:     #f59e0b;
+      --text:       #e2e8f0;
+      --muted:      #94a3b8;
+      --radius:     12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .app { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--surface);
+      border-right: 1px solid var(--border); padding: 24px 0;
+      position: fixed; top: 0; left: 0; overflow-y: auto;
+    }
+    .main { margin-left: 240px; padding: 32px; max-width: 1100px; }
+
+    /* ── Sidebar ── */
+    .logo { padding: 0 20px 24px; }
+    .logo h1 { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .logo p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .nav-section { padding: 8px 20px 4px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; cursor: pointer; font-size: 14px;
+      border-left: 3px solid transparent; transition: all 0.15s;
+    }
+    .nav-item:hover  { background: rgba(124,92,252,0.08); color: var(--accent); }
+    .nav-item.active { background: rgba(124,92,252,0.15); color: var(--accent);
+                       border-left-color: var(--accent); }
+    .nav-item .icon  { font-size: 16px; width: 20px; text-align: center; }
+
+    .mode-toggle { padding: 16px 20px; margin-top: 16px; border-top: 1px solid var(--border); }
+    .mode-toggle label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 8px; }
+    .toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 3px; }
+    .toggle button {
+      flex: 1; padding: 6px; border: none; background: none; color: var(--muted);
+      border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.15s;
+    }
+    .toggle button.active { background: var(--accent); color: white; }
+
+    /* ── Cards ── */
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
+    .page-title span { color: var(--accent); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .card h3 { font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+    .card .value { font-size: 28px; font-weight: 700; }
+    .card .sub   { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .stat-green  { color: var(--green); }
+    .stat-yellow { color: var(--yellow); }
+    .stat-accent { color: var(--accent); }
+    .stat-cyan   { color: var(--accent2); }
+
+    /* ── Forms ── */
+    .form-card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+    .form-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-row.single { grid-template-columns: 1fr; }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; outline: none; transition: border 0.15s;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    .btn {
+      padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;
+      font-size: 14px; font-weight: 600; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #6b4fe8; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-green { background: var(--green); color: white; }
+    .btn-red { background: var(--red); color: white; }
+
+    /* ── Result display ── */
+    .result {
+      margin-top: 16px; padding: 16px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: monospace; font-size: 12px; white-space: pre-wrap;
+      max-height: 400px; overflow-y: auto; display: none;
+    }
+    .result.visible { display: block; }
+    .result.success { border-color: var(--green); color: var(--green); }
+    .result.error   { border-color: var(--red);   color: var(--red); }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+      border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-green  { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(124,92,252,0.15); color: var(--accent); }
+
+    /* ── Advanced toggle indicator ── */
+    .advanced-only { display: none; }
+    body.advanced-mode .advanced-only { display: block; }
+
+    /* ── Pause banner ── */
+    .pause-banner {
+      background: rgba(239,68,68,0.1); border: 1px solid var(--red);
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;
+      font-size: 13px; color: var(--red); display: none;
+    }
+    .pause-banner.visible { display: block; }
+
+    /* ── Status dot ── */
+    .status-dot { display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 6px; }
+    .status-dot.green  { background: var(--green); }
+    .status-dot.red    { background: var(--red); }
+    .status-dot.yellow { background: var(--yellow); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar">
+    <div class="logo">
+      <h1>HQ Protocol</h1>
+      <p>v1.0 · Three-Layer Architecture</p>
+    </div>
+
+    <div class="nav-section">Layer 1 — Payments</div>
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)">
+      <span class="icon">⬡</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="wallets" onclick="showPage('wallets', this)">
+      <span class="icon">◎</span> Wallets
+    </div>
+    <div class="nav-item" data-page="send" onclick="showPage('send', this)">
+      <span class="icon">→</span> Send Payment
+    </div>
+    <div class="nav-item" data-page="rates" onclick="showPage('rates', this)">
+      <span class="icon">⇄</span> Exchange Rates
+    </div>
+
+    <div class="nav-section">Layer 2 — Consent</div>
+    <div class="nav-item" data-page="data" onclick="showPage('data', this)">
+      <span class="icon">◈</span> Submit Data
+    </div>
+    <div class="nav-item" data-page="consent" onclick="showPage('consent', this)">
+      <span class="icon">⊙</span> Manage Consent
+    </div>
+    <div class="nav-item" data-page="access" onclick="showPage('access', this)">
+      <span class="icon">⊞</span> Access Control
+    </div>
+
+    <div class="nav-section">Layer 3 — Tokens</div>
+    <div class="nav-item" data-page="tokens" onclick="showPage('tokens', this)">
+      <span class="icon">◆</span> HQT Balance
+    </div>
+    <div class="nav-item" data-page="staking" onclick="showPage('staking', this)">
+      <span class="icon">⬢</span> Staking
+    </div>
+    <div class="nav-item" data-page="governance" onclick="showPage('governance', this)">
+      <span class="icon">⊘</span> Governance
+    </div>
+
+    <div class="mode-toggle">
+      <label>Display Mode</label>
+      <div class="toggle">
+        <button class="active" id="btn-standard" onclick="setMode('standard')">Standard</button>
+        <button id="btn-advanced" onclick="setMode('advanced')">Advanced</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-title">Dashboard — <span>HQ Protocol V1</span></div>
+      <div id="pause-banner" class="pause-banner">⚠ One or more layers are currently paused.</div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>System Status</h3>
+          <div class="value stat-green" id="sys-status">Healthy</div>
+          <div class="sub" id="sys-time">—</div>
+        </div>
+        <div class="card">
+          <h3>HQT Total Minted</h3>
+          <div class="value stat-accent" id="hqt-minted">—</div>
+          <div class="sub">of 100,000,000 max supply</div>
+        </div>
+        <div class="card">
+          <h3>Exchange Rate</h3>
+          <div class="value stat-cyan" id="ngn-rate">—</div>
+          <div class="sub">1 USD = X NGN (demo)</div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2>Quick Start — Create a Demo Wallet</h2>
+        <div class="form-row">
+          <div><label>Name</label><input id="qs-name" value="Amara Okonkwo" /></div>
+          <div><label>Email</label><input id="qs-email" value="amara@example.com" /></div>
+        </div>
+        <div class="form-row">
+          <div><label>Phone</label><input id="qs-phone" value="+234 801 234 5678" /></div>
+          <div><label>PIN</label><input id="qs-pin" type="password" value="1234" /></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Currency</label>
+            <select id="qs-currency">
+              <option value="NGN">NGN — Nigerian Naira</option>
+              <option value="ZAR">ZAR — South African Rand</option>
+              <option value="KES">KES — Kenyan Shilling</option>
+              <option value="GBP">GBP — British Pound</option>
+              <option value="USD">USD — US Dollar</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px">
+            <button class="btn btn-primary" onclick="createQuickWallet()" style="flex:1">Create Wallet</button>
+            <button class="btn btn-secondary" onclick="loadDashboardStats()">Refresh</button>
+          </div>
+        </div>
+        <div id="qs-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── WALLETS ── -->
+    <div id="page-wallets" class="page">
+      <div class="page-title">Wallets — <span>Layer 1</span></div>
+      <div class="form-card">
+        <h2>Look Up Wallet</h2>
+        <div class="form-row">
+          <div><label>Identifier (@hqId, phone, email, address, walletId)</label>
+            <input id="lookup-id" placeholder="@amara.hq" /></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" onclick="lookupWallet()" style="width:100%">Look Up</button>
+          </div>
+        </div>
+        <div id="lookup-result" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>Seed Balance (dev only)</h2>
+        <div class="form-row">
+          <div><label>Wallet ID</label><input id="seed-id" placeholder="w_abc123" /></div>
+          <div><label>Amount (USDC)</label><input id="seed-amount" type="number" value="500" /></div>
+        </div>
+        <button class="btn btn-green" onclick="seedBalance()">Seed Balance</button>
+        <div id="seed-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── SEND PAYMENT ── -->
+    <div id="page-send" class="page">
+      <div class="page-title">Send Payment — <span>Layer 1</span></div>
+      <div class="form-card">
+        <h2>Cross-Border Payment</h2>
+        <div class="form-row">
+          <div><label>From (sender HQ ID / phone / email)</label>
+            <input id="pay-from" placeholder="@amara.hq" /></div>
+          <div><label>To (recipient HQ ID / phone / email)</label>
+            <input id="pay-to" placeholder="@nkosi.hq" /></div>
+        </div>
+        <div class="form-row">
+          <div><label>Amount</label><input id="pay-amount" type="number" placeholder="5000" /></div>
+          <div>
+            <label>Currency</label>
+            <select id="pay-currency">
+              <option value="NGN">NGN</option>
+              <option value="ZAR">ZAR</option>
+              <option value="KES">KES</option>
+              <option value="GBP">GBP</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>PIN</label><input id="pay-pin" type="password" placeholder="1234" /></div>
+          <div><label>Memo (optional)</label><input id="pay-memo" placeholder="IVF deposit" /></div>
+        </div>
+        <button class="btn btn-primary" onclick="sendPayment()">Send Payment</button>
+        <div id="pay-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── EXCHANGE RATES ── -->
+    <div id="page-rates" class="page">
+      <div class="page-title">Exchange Rates — <span>Layer 1</span></div>
+      <div class="form-card">
+        <h2>Current Rates</h2>
+        <div id="rates-table-wrap"></div>
+        <button class="btn btn-secondary" onclick="loadRates()" style="margin-top:16px">Refresh Rates</button>
+      </div>
+      <div class="form-card">
+        <h2>Currency Converter</h2>
+        <div class="form-row">
+          <div><label>Amount</label><input id="conv-amount" type="number" value="5000" /></div>
+          <div>
+            <label>From</label>
+            <select id="conv-from">
+              <option value="NGN">NGN</option>
+              <option value="ZAR">ZAR</option>
+              <option value="KES">KES</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+          <div>
+            <label>To</label>
+            <select id="conv-to">
+              <option value="ZAR">ZAR</option>
+              <option value="NGN">NGN</option>
+              <option value="KES">KES</option>
+              <option value="USDC">USDC</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="convertCurrency()">Convert</button>
+        <div id="conv-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── SUBMIT DATA ── -->
+    <div id="page-data" class="page">
+      <div class="page-title">Submit Health Data — <span>Layer 2</span></div>
+      <div class="form-card">
+        <h2>Contribute Data</h2>
+        <div class="form-row">
+          <div><label>Contributor Wallet ID</label>
+            <input id="data-contributor" placeholder="w_abc123" /></div>
+          <div>
+            <label>Category</label>
+            <select id="data-category">
+              <option value="fertility_cycle_data">Fertility Cycle Data</option>
+              <option value="hormonal_profile">Hormonal Profile</option>
+              <option value="treatment_outcomes">Treatment Outcomes</option>
+              <option value="demographic_metadata">Demographic Metadata</option>
+              <option value="lifestyle_factors">Lifestyle Factors</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div><label>Record (JSON)</label>
+            <textarea id="data-record" rows="5" placeholder='{"cycleLength": 28, "lh_peak": 42.5, ...}'></textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitData()">Submit Data</button>
+        <div id="data-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── CONSENT ── -->
+    <div id="page-consent" class="page">
+      <div class="page-title">Consent Management — <span>Layer 2</span></div>
+      <div class="form-card">
+        <h2>Grant Consent</h2>
+        <div class="form-row">
+          <div><label>Contributor ID</label><input id="cst-contributor" /></div>
+          <div><label>Content Hash</label><input id="cst-hash" /></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Category</label>
+            <select id="cst-category">
+              <option value="fertility_cycle_data">Fertility Cycle Data</option>
+              <option value="hormonal_profile">Hormonal Profile</option>
+              <option value="treatment_outcomes">Treatment Outcomes</option>
+              <option value="demographic_metadata">Demographic Metadata</option>
+              <option value="lifestyle_factors">Lifestyle Factors</option>
+            </select>
+          </div>
+          <div>
+            <label>Buyer Types (comma-separated)</label>
+            <input id="cst-types" value="academic_research" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div><label>Valid Until (blank = indefinite)</label>
+            <input id="cst-until" type="date" /></div>
+          <div><label>Purpose</label>
+            <input id="cst-purpose" value="Academic research" /></div>
+        </div>
+        <button class="btn btn-primary" onclick="grantConsent()">Grant Consent</button>
+        <div id="cst-result" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>View / Revoke Consents</h2>
+        <div class="form-row">
+          <div><label>Contributor Wallet ID</label>
+            <input id="cst-view-id" /></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-secondary" onclick="listConsents()" style="width:100%">Load Consents</button>
+          </div>
+        </div>
+        <div id="cst-list" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── ACCESS CONTROL ── -->
+    <div id="page-access" class="page">
+      <div class="page-title">Access Control — <span>Layer 2</span></div>
+      <div class="form-card">
+        <h2>Register Data Buyer</h2>
+        <div class="form-row">
+          <div><label>Buyer Wallet ID</label><input id="buyer-id" /></div>
+          <div><label>Organisation Name</label><input id="buyer-name" /></div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Buyer Type</label>
+            <select id="buyer-type">
+              <option value="academic_research">Academic Research</option>
+              <option value="pharmaceutical">Pharmaceutical</option>
+              <option value="commercial_ai_training">Commercial AI Training</option>
+              <option value="clinical_trial">Clinical Trial</option>
+            </select>
+          </div>
+          <div><label>Jurisdiction</label><input id="buyer-jurisdiction" value="EU" /></div>
+        </div>
+        <button class="btn btn-primary" onclick="registerBuyer()">Register Buyer</button>
+        <div id="buyer-result" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>Request Data Access</h2>
+        <div class="form-row">
+          <div><label>Buyer ID</label><input id="access-buyer" /></div>
+          <div><label>Content Hash</label><input id="access-hash" /></div>
+        </div>
+        <div class="form-row single">
+          <div><label>Purpose</label><input id="access-purpose" /></div>
+        </div>
+        <button class="btn btn-primary" onclick="requestAccess()">Request Access</button>
+        <div id="access-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── TOKENS ── -->
+    <div id="page-tokens" class="page">
+      <div class="page-title">HQT Balance — <span>Layer 3</span></div>
+      <div class="form-card">
+        <h2>Check Balance</h2>
+        <div class="form-row">
+          <div><label>Wallet ID</label><input id="tok-id" /></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" onclick="loadTokenBalance()" style="width:100%">Load Balance</button>
+          </div>
+        </div>
+        <div id="tok-balance" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>Redeem HQT for Treatment Discount</h2>
+        <div class="form-row">
+          <div><label>Holder Wallet ID</label><input id="disc-holder" /></div>
+          <div><label>HQT to Redeem</label><input id="disc-hqt" type="number" value="1000" /></div>
+        </div>
+        <div class="form-row">
+          <div><label>Treatment Cost</label><input id="disc-cost" type="number" value="15000" /></div>
+          <div>
+            <label>Currency</label>
+            <select id="disc-currency">
+              <option value="ZAR">ZAR</option>
+              <option value="NGN">NGN</option>
+              <option value="KES">KES</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="redeemDiscount()">Redeem Discount</button>
+        <div id="disc-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── STAKING ── -->
+    <div id="page-staking" class="page">
+      <div class="page-title">HQT Staking — <span>Layer 3</span></div>
+      <div class="grid-2" style="margin-bottom:16px">
+        <div class="card">
+          <h3>3-Month Lock</h3>
+          <div class="value stat-accent">8% APY</div>
+          <div class="sub">Lock for 90 days</div>
+        </div>
+        <div class="card">
+          <h3>12-Month Lock</h3>
+          <div class="value stat-green">15% APY</div>
+          <div class="sub">Lock for 365 days</div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h2>Stake HQT</h2>
+        <div class="form-row">
+          <div><label>Holder Wallet ID</label><input id="stk-holder" /></div>
+          <div><label>Amount (HQT)</label><input id="stk-amount" type="number" value="100" /></div>
+        </div>
+        <div class="form-row single">
+          <div>
+            <label>Lock Period</label>
+            <select id="stk-period">
+              <option value="THREE_MONTH">3 Months (8% APY)</option>
+              <option value="TWELVE_MONTH">12 Months (15% APY)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="stakeTokens()">Stake HQT</button>
+        <div id="stk-result" class="result"></div>
+      </div>
+    </div>
+
+    <!-- ── GOVERNANCE ── -->
+    <div id="page-governance" class="page">
+      <div class="page-title">Governance — <span>Layer 3</span></div>
+      <div class="form-card">
+        <h2>Submit Proposal</h2>
+        <div class="form-row">
+          <div><label>Proposer Wallet ID</label><input id="gov-proposer" /></div>
+          <div>
+            <label>Proposal Type</label>
+            <select id="gov-type">
+              <option value="PARAM_CHANGE">Parameter Change</option>
+              <option value="ADD_GUARDIAN">Add Guardian</option>
+              <option value="CORRIDOR_ADD">Add Corridor</option>
+              <option value="FREE_TEXT">Free Text Vote</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div><label>Title</label><input id="gov-title" /></div>
+        </div>
+        <div class="form-row single">
+          <div><label>Description</label>
+            <textarea id="gov-desc" rows="3"></textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitProposal()">Submit Proposal</button>
+        <div id="gov-result" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>Cast Vote</h2>
+        <div class="form-row">
+          <div><label>Proposal ID</label><input id="vote-proposal" /></div>
+          <div><label>Voter Wallet ID</label><input id="vote-voter" /></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-green" onclick="castVote('yes')">Vote YES</button>
+          <button class="btn btn-red"   onclick="castVote('no')">Vote NO</button>
+        </div>
+        <div id="vote-result" class="result"></div>
+      </div>
+
+      <div class="form-card">
+        <h2>Active Proposals</h2>
+        <button class="btn btn-secondary" onclick="loadProposals()">Refresh Proposals</button>
+        <div id="proposals-list" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = '';  // same origin
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(pageId, navItem) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  navItem.classList.add('active');
+  if (pageId === 'dashboard') loadDashboardStats();
+  if (pageId === 'rates')     loadRates();
+  if (pageId === 'governance') loadProposals();
+}
+
+function setMode(mode) {
+  document.getElementById('btn-standard').classList.toggle('active', mode === 'standard');
+  document.getElementById('btn-advanced').classList.toggle('active', mode === 'advanced');
+  document.body.classList.toggle('advanced-mode', mode === 'advanced');
+}
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(API + path, opts);
+  const data = await res.json();
+  return data;
+}
+
+function showResult(elId, data, success) {
+  const el = document.getElementById(elId);
+  el.textContent = JSON.stringify(data, null, 2);
+  el.className   = 'result visible ' + (success ? 'success' : 'error');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboardStats() {
+  try {
+    const [health, supply, rates] = await Promise.all([
+      api('GET', '/api/health'),
+      api('GET', '/api/tokens/supply'),
+      api('GET', '/api/rates'),
+    ]);
+    document.getElementById('sys-status').textContent = health.status || 'Unknown';
+    document.getElementById('sys-time').textContent   = new Date(health.time).toLocaleString();
+    document.getElementById('hqt-minted').textContent = (supply.totalMinted || 0).toLocaleString() + ' HQT';
+    document.getElementById('ngn-rate').textContent   = (rates.rates?.NGN || '—') + ' NGN';
+  } catch(e) { console.error(e); }
+}
+
+async function createQuickWallet() {
+  const data = await api('POST', '/api/wallets', {
+    name:     document.getElementById('qs-name').value,
+    email:    document.getElementById('qs-email').value,
+    phone:    document.getElementById('qs-phone').value,
+    pin:      document.getElementById('qs-pin').value,
+    currency: document.getElementById('qs-currency').value,
+  });
+  showResult('qs-result', data, data.ok);
+}
+
+// ── Wallets ───────────────────────────────────────────────────────────────────
+async function lookupWallet() {
+  const id   = document.getElementById('lookup-id').value;
+  const data = await api('GET', `/api/wallets/${encodeURIComponent(id)}`);
+  showResult('lookup-result', data, data.ok);
+}
+
+async function seedBalance() {
+  const id  = document.getElementById('seed-id').value;
+  const amt = document.getElementById('seed-amount').value;
+  const data = await api('POST', `/api/wallets/${encodeURIComponent(id)}/seed`, { amount: Number(amt) });
+  showResult('seed-result', data, data.ok);
+}
+
+// ── Payments ──────────────────────────────────────────────────────────────────
+async function sendPayment() {
+  const data = await api('POST', '/api/payments/send', {
+    senderIdentifier:    document.getElementById('pay-from').value,
+    recipientIdentifier: document.getElementById('pay-to').value,
+    amount:              Number(document.getElementById('pay-amount').value),
+    currency:            document.getElementById('pay-currency').value,
+    pin:                 document.getElementById('pay-pin').value,
+    memo:                document.getElementById('pay-memo').value,
+  });
+  showResult('pay-result', data, data.ok);
+}
+
+// ── Rates ─────────────────────────────────────────────────────────────────────
+async function loadRates() {
+  const data = await api('GET', '/api/rates');
+  if (!data.ok) return;
+  const rows = Object.entries(data.rates || {}).map(([k, v]) =>
+    `<tr><td>${k}</td><td>1 USD = ${v} ${k}</td></tr>`
+  ).join('');
+  document.getElementById('rates-table-wrap').innerHTML =
+    `<table><thead><tr><th>Currency</th><th>Rate (to USD)</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+async function convertCurrency() {
+  const data = await api('POST', '/api/convert', {
+    amount: Number(document.getElementById('conv-amount').value),
+    from:   document.getElementById('conv-from').value,
+    to:     document.getElementById('conv-to').value,
+  });
+  showResult('conv-result', data, data.ok);
+}
+
+// ── Data submission ───────────────────────────────────────────────────────────
+async function submitData() {
+  let record = {};
+  try { record = JSON.parse(document.getElementById('data-record').value || '{}'); } catch(e) {}
+  const data = await api('POST', '/api/data/submit', {
+    contributorId: document.getElementById('data-contributor').value,
+    category:      document.getElementById('data-category').value,
+    record,
+  });
+  showResult('data-result', data, data.ok);
+}
+
+// ── Consent ───────────────────────────────────────────────────────────────────
+async function grantConsent() {
+  const types = document.getElementById('cst-types').value.split(',').map(s => s.trim());
+  const until = document.getElementById('cst-until').value;
+  const data  = await api('POST', '/api/consent/grant', {
+    contributorId: document.getElementById('cst-contributor').value,
+    contentHash:   document.getElementById('cst-hash').value,
+    category:      document.getElementById('cst-category').value,
+    buyerTypes:    types,
+    validUntil:    until ? new Date(until).toISOString() : null,
+    purpose:       document.getElementById('cst-purpose').value,
+  });
+  showResult('cst-result', data, data.ok);
+}
+
+async function listConsents() {
+  const id   = document.getElementById('cst-view-id').value;
+  const data = await api('GET', `/api/consent/${encodeURIComponent(id)}`);
+  showResult('cst-list', data, data.ok);
+}
+
+// ── Access Control ────────────────────────────────────────────────────────────
+async function registerBuyer() {
+  const data = await api('POST', '/api/buyers/register', {
+    buyerId:      document.getElementById('buyer-id').value,
+    name:         document.getElementById('buyer-name').value,
+    buyerType:    document.getElementById('buyer-type').value,
+    jurisdiction: document.getElementById('buyer-jurisdiction').value,
+  });
+  showResult('buyer-result', data, data.ok);
+}
+
+async function requestAccess() {
+  const data = await api('POST', '/api/access/request', {
+    buyerId:     document.getElementById('access-buyer').value,
+    contentHash: document.getElementById('access-hash').value,
+    purpose:     document.getElementById('access-purpose').value,
+  });
+  showResult('access-result', data, data.ok);
+}
+
+// ── Tokens ────────────────────────────────────────────────────────────────────
+async function loadTokenBalance() {
+  const id   = document.getElementById('tok-id').value;
+  const data = await api('GET', `/api/tokens/${encodeURIComponent(id)}`);
+  showResult('tok-balance', data, data.ok);
+}
+
+async function redeemDiscount() {
+  const data = await api('POST', '/api/tokens/discount', {
+    holderId:      document.getElementById('disc-holder').value,
+    hqtToRedeem:   Number(document.getElementById('disc-hqt').value),
+    treatmentCost: Number(document.getElementById('disc-cost').value),
+    currency:      document.getElementById('disc-currency').value,
+  });
+  showResult('disc-result', data, data.ok);
+}
+
+// ── Staking ───────────────────────────────────────────────────────────────────
+async function stakeTokens() {
+  const data = await api('POST', '/api/tokens/stake', {
+    holderId:   document.getElementById('stk-holder').value,
+    amount:     Number(document.getElementById('stk-amount').value),
+    lockPeriod: document.getElementById('stk-period').value,
+  });
+  showResult('stk-result', data, data.ok);
+}
+
+// ── Governance ────────────────────────────────────────────────────────────────
+async function submitProposal() {
+  const data = await api('POST', '/api/governance/propose', {
+    proposerId:  document.getElementById('gov-proposer').value,
+    type:        document.getElementById('gov-type').value,
+    title:       document.getElementById('gov-title').value,
+    description: document.getElementById('gov-desc').value,
+  });
+  showResult('gov-result', data, data.ok);
+}
+
+async function castVote(vote) {
+  const data = await api('POST', '/api/governance/vote', {
+    proposalId: document.getElementById('vote-proposal').value,
+    voterId:    document.getElementById('vote-voter').value,
+    vote,
+  });
+  showResult('vote-result', data, data.ok);
+}
+
+async function loadProposals() {
+  const data = await api('GET', '/api/governance');
+  if (!data.ok) return;
+  const proposals = data.proposals || [];
+  if (proposals.length === 0) {
+    document.getElementById('proposals-list').innerHTML =
+      '<div style="color:var(--muted);font-size:13px">No proposals yet.</div>';
+    return;
+  }
+  const rows = proposals.map(p => `
+    <tr>
+      <td><code style="font-size:11px">${p.proposalId}</code></td>
+      <td>${p.title}</td>
+      <td><span class="badge badge-blue">${p.type}</span></td>
+      <td>
+        <span style="color:var(--green)">${p.yesVotes.toLocaleString()} yes</span> /
+        <span style="color:var(--red)">${p.noVotes.toLocaleString()} no</span>
+        (${p.majorityPct})
+      </td>
+      <td><span class="badge ${p.status === 'active' ? 'badge-yellow' : p.status === 'passed' ? 'badge-green' : 'badge-red'}">${p.status}</span></td>
+    </tr>
+  `).join('');
+  document.getElementById('proposals-list').innerHTML =
+    `<table><thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Votes</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadDashboardStats();
+setInterval(loadDashboardStats, 30000);
+</script>
+</body>
+</html>

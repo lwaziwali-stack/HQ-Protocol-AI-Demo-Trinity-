@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trinity Ecosystem - FertilityFi Product Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .demo-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 100%);
+            padding: 40px 60px;
+            border-bottom: 1px solid #4a3a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hq-logo {
+            width: 50px;
+            height: 50px;
+            background: #c9a5b5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: #0a0a0a;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #c9a5b5;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header-stats {
+            font-size: 13px;
+            color: #c9a5b5;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Stage Navigation */
+        .stage-navigation {
+            background: #0a0a0a;
+            padding: 30px 60px;
+            border-bottom: 1px solid #2a2a2a;
+            overflow-x: auto;
+        }
+
+        .stages-container {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .stage-button {
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 2px solid #3a3a3a;
+            color: #999;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .stage-button:hover {
+            border-color: #c9a5b5;
+            color: #c9a5b5;
+        }
+
+        .stage-button.active {
+            background: #c9a5b5;
+            border-color: #c9a5b5;
+            color: #0a0a0a;
+        }
+
+        /* Stage Content */
+        .stage-content {
+            flex: 1;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .stage-content.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stage Backgrounds */
+        .stage-1 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+        .stage-2 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+        .stage-3 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+        .stage-4 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+        .stage-5 { background: linear-gradient(135deg, #0a0a0a 0%, #2a1a1a 100%); }
+        .stage-6 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+        .stage-7 { background: linear-gradient(135deg, #0a0a0a 0%, #1a0f1a 100%); }
+
+        .stage-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #c9a5b5;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .stage-subtitle {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 40px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .stage-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+            max-width: 800px;
+        }
+
+        .stat-card {
+            background: rgba(201, 165, 181, 0.1);
+            border: 1px solid #c9a5b5;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #c9a5b5;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+            max-width: 900px;
+        }
+
+        .feature-box {
+            background: rgba(201, 165, 181, 0.05);
+            border: 1px solid rgba(201, 165, 181, 0.3);
+            padding: 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover {
+            border-color: #c9a5b5;
+            background: rgba(201, 165, 181, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #c9a5b5;
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .community-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 40px;
+            max-width: 1000px;
+        }
+
+        .community-item {
+            background: rgba(201, 165, 181, 0.05);
+            border: 1px solid rgba(201, 165, 181, 0.3);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .community-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .community-title {
+            color: #c9a5b5;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .community-desc {
+            color: #999;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* LLM Specific Styles */
+        .llm-market-gap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 50px;
+            max-width: 1000px;
+        }
+
+        .gap-box {
+            background: rgba(201, 165, 181, 0.05);
+            border: 2px solid rgba(201, 165, 181, 0.3);
+            padding: 40px;
+            border-radius: 12px;
+        }
+
+        .gap-box.problem {
+            border-color: #ff6b6b;
+        }
+
+        .gap-box.solution {
+            border-color: #4ade80;
+        }
+
+        .gap-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .gap-box.problem .gap-title {
+            color: #ff6b6b;
+        }
+
+        .gap-box.solution .gap-title {
+            color: #4ade80;
+        }
+
+        .gap-stat {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .gap-box.problem .gap-stat {
+            color: #ff6b6b;
+        }
+
+        .gap-box.solution .gap-stat {
+            color: #4ade80;
+        }
+
+        .gap-desc {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .monetization-streams {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 40px;
+            max-width: 1000px;
+        }
+
+        .stream-card {
+            background: rgba(201, 165, 181, 0.08);
+            border: 1px solid rgba(201, 165, 181, 0.3);
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        .stream-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .stream-title {
+            color: #c9a5b5;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .stream-desc {
+            color: #999;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .stream-value {
+            color: #4ade80;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .flywheel {
+            margin-top: 50px;
+            max-width: 900px;
+        }
+
+        .flywheel-step {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(201, 165, 181, 0.05);
+            border: 1px solid rgba(201, 165, 181, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .flywheel-step:hover {
+            border-color: #c9a5b5;
+            background: rgba(201, 165, 181, 0.1);
+        }
+
+        .step-number {
+            background: #c9a5b5;
+            color: #0a0a0a;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            color: #c9a5b5;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .step-description {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .revenue-table {
+            margin-top: 40px;
+            max-width: 1000px;
+            border: 1px solid rgba(201, 165, 181, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: rgba(201, 165, 181, 0.15);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 20px;
+            border-bottom: 1px solid rgba(201, 165, 181, 0.3);
+        }
+
+        .table-cell {
+            font-weight: 600;
+            font-size: 12px;
+            color: #c9a5b5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 20px;
+            border-bottom: 1px solid rgba(201, 165, 181, 0.1);
+            align-items: center;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row.highlight {
+            background: rgba(201, 165, 181, 0.05);
+        }
+
+        .table-label {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .table-value {
+            color: #c9a5b5;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0a0a0a;
+            border-top: 1px solid #2a2a2a;
+            padding: 30px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .cta-button {
+            background: #c9a5b5;
+            color: #0a0a0a;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #d9b5c5;
+            transform: translateY(-2px);
+        }
+
+        .highlight {
+            color: #c9a5b5;
+            font-weight: 600;
+        }
+
+        .success-metric {
+            background: rgba(201, 165, 181, 0.15);
+            padding: 20px;
+            border-left: 3px solid #c9a5b5;
+            margin: 30px 0;
+            border-radius: 4px;
+            max-width: 800px;
+        }
+
+        .moat-badge {
+            display: inline-block;
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header { padding: 25px 30px; }
+            .stage-content { padding: 30px; }
+            .stage-title { font-size: 32px; }
+            .feature-grid, .community-features, .monetization-streams {
+                grid-template-columns: 1fr;
+            }
+            .stage-stats { grid-template-columns: 1fr; }
+            .llm-market-gap { grid-template-columns: 1fr; }
+            .table-header, .table-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="hq-logo">HQ</div>
+                <h1>Trinity Ecosystem</h1>
+            </div>
+            <div class="header-right">
+                <div class="header-subtitle">FertilityFi + HQ.AI + Social Network + Proprietary LLM</div>
+                <div class="header-stats">Year 3: $158M Revenue | 1M+ Users | $30M+ LLM Revenue</div>
+            </div>
+        </div>
+
+        <!-- Stage Navigation -->
+        <div class="stage-navigation">
+            <div class="stages-container">
+                <button class="stage-button active" onclick="switchStage(0)">1. The Problem</button>
+                <button class="stage-button" onclick="switchStage(1)">2. FertilityFi</button>
+                <button class="stage-button" onclick="switchStage(2)">3. Social Network</button>
+                <button class="stage-button" onclick="switchStage(3)">4. HQ.AI Protocol</button>
+                <button class="stage-button" onclick="switchStage(4)">5. Proprietary LLM</button>
+                <button class="stage-button" onclick="switchStage(5)">6. Ecosystem Flywheel</button>
+                <button class="stage-button" onclick="switchStage(6)">7. Scale & LLM Revenue</button>
+            </div>
+        </div>
+
+        <!-- Stage Content -->
+        <div class="content">
+            <!-- Stage 1: Problem -->
+            <div class="stage-content stage-1 active">
+                <div class="stage-title">Women Face a Fertility Finance Crisis</div>
+                <div class="stage-subtitle">
+                    IVF costs $15,000-$50,000 per cycle. Traditional loans charge 25-45% interest. Medical tourism requires upfront capital. In Africa, 90% of women lack access to fertility financing.
+                </div>
+                <div class="stage-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">90%</div>
+                        <div class="stat-label">Unserved in Africa</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">25-45%</div>
+                        <div class="stat-label">Predatory APR</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">$15-50K</div>
+                        <div class="stat-label">Per IVF Cycle</div>
+                    </div>
+                </div>
+                <div class="success-metric">
+                    <strong>The Insight:</strong> Women need 3 things: affordable financing, data ownership, and community support. But they also create something valuable that nobody is capturing: verified health data on women of color.
+                </div>
+            </div>
+
+            <!-- Stage 2: FertilityFi -->
+            <div class="stage-content stage-2">
+                <div class="stage-title">FertilityFi: Stablecoin-Backed Financing</div>
+                <div class="stage-subtitle">
+                    Transparent, affordable loans using Solana stablecoins. Clinic partnerships across Africa. Woman gets $20K-$40K instantly. Proven unit economics (Nedbank: 40% YoY growth).
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-box">
+                        <div class="feature-title">✓ Smart Underwriting</div>
+                        <div class="feature-description">Credit decisioning using alternative data: clinic relationships, diaspora networks, and behavioral signals instead of traditional credit scores.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">✓ Stablecoin Rails</div>
+                        <div class="feature-description">USDC/USDT on Solana enable cross-border payments, instant settlement, and 40% lower transaction costs vs traditional banks.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">✓ Clinic Partnerships</div>
+                        <div class="feature-description">Direct integrations with 50+ fertility clinics across Nigeria, Kenya, South Africa, and Ghana. Clinic receives payment instantly.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">✓ Flexible Repayment</div>
+                        <div class="feature-description">Income-based repayment starting 6 months after treatment. Interest rates: 8-12% APR (vs 25-45% traditional).</div>
+                    </div>
+                </div>
+                <div class="success-metric">
+                    <strong>Proof Point:</strong> At Nedbank, I built the fertility loan product which achieved 40% YoY loan growth and became the bank's fastest-growing vertical. Unit economics are proven at scale.
+                </div>
+            </div>
+
+            <!-- Stage 3: Social Network -->
+            <div class="stage-content stage-3">
+                <div class="stage-title">Social Network: Community + Engagement + Data</div>
+                <div class="stage-subtitle">
+                    Women join a community of 500K+. Share treatment experiences, find clinic recommendations, connect with women in similar situations. Each interaction trains the proprietary LLM while women earn money.
+                </div>
+                <div class="community-features">
+                    <div class="community-item">
+                        <div class="community-icon">💬</div>
+                        <div class="community-title">Treatment Circles</div>
+                        <div class="community-desc">Join groups by clinic, treatment type, location. Real advice from women who've been there.</div>
+                    </div>
+                    <div class="community-item">
+                        <div class="community-icon">⭐</div>
+                        <div class="community-title">Clinic Reviews</div>
+                        <div class="community-desc">Rate & review fertility clinics. Verified patient outcomes. Build reputation.</div>
+                    </div>
+                    <div class="community-item">
+                        <div class="community-icon">🎁</div>
+                        <div class="community-title">Tips & Earnings</div>
+                        <div class="community-desc">Help another woman = earn stablecoins. Treatment outcome = bonus rewards.</div>
+                    </div>
+                    <div class="community-item">
+                        <div class="community-icon">🔗</div>
+                        <div class="community-title">Real-World Evidence</div>
+                        <div class="community-desc">Every post, every outcome, every interaction becomes training data for AI.</div>
+                    </div>
+                    <div class="community-item">
+                        <div class="community-icon">📱</div>
+                        <div class="community-title">Mobile First</div>
+                        <div class="community-desc">Built for Africa. Works on 2G networks. Low data footprint. Diaspora connections.</div>
+                    </div>
+                    <div class="community-item">
+                        <div class="community-icon">🌍</div>
+                        <div class="community-title">Cross-Border</div>
+                        <div class="community-desc">Connect women across Africa & diaspora. Share knowledge. Access global best practices.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: HQ.AI Protocol -->
+            <div class="stage-content stage-4">
+                <div class="stage-title">HQ.AI Protocol: Own Your Data</div>
+                <div class="stage-subtitle">
+                    During loan application, woman creates an encrypted identity vault. All medical data (lab results, ultrasounds, treatment outcomes) stays in her control. She owns the asset, not the platform.
+                </div>
+                <div class="feature-grid" style="margin-top: 50px;">
+                    <div class="feature-box">
+                        <div class="feature-title">🔐 Decentralized</div>
+                        <div class="feature-description">Built on Solana. User controls private keys. Data portable to any platform. No vendor lock-in.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">💰 Revenue Share</div>
+                        <div class="feature-description">Researchers, pharma, clinics pay to access consented data. Woman earns stablecoins. HQ Protocol takes 20% commission.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">✓ Verified Consent</div>
+                        <div class="feature-description">Blockchain-verified consent = premium data pricing. Researchers trust the legitimacy of the dataset.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-title">📊 Clinical Grade</div>
+                        <div class="feature-description">HIPAA certified. GDPR compliant. Medical-grade encryption. Healthcare-ready infrastructure.</div>
+                    </div>
+                </div>
+                <div class="success-metric">
+                    <strong>The Layer:</strong> HQ.AI Protocol is the ownership layer. It ensures women control their data, earn from it, and Trinity can license it ethically to enterprise partners.
+                </div>
+            </div>
+
+            <!-- Stage 5: PROPRIETARY LLM (THE CENTERPIECE) -->
+            <div class="stage-content stage-5">
+                <div class="moat-badge">⚡ THE SCALE INFLECTION POINT</div>
+                <div class="stage-title">Proprietary LLM: The Hidden $500M+ Asset</div>
+                <div class="stage-subtitle">
+                    By Year 3, Trinity owns the world's only large language model trained on 200K+ verified women of color health data. This isn't a feature—it's a separate multi-billion dollar business.
+                </div>
+
+                <!-- Market Gap -->
+                <div style="margin-top: 50px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #c9a5b5; margin-bottom: 30px;">The 96% Market Gap</div>
+                    <div class="llm-market-gap">
+                        <div class="gap-box problem">
+                            <div class="gap-title">Current AI Models</div>
+                            <div class="gap-stat">96%</div>
+                            <div class="gap-desc">Of AI models lack women of color training data. Healthcare AI fails women of color 20-40% more often. FDA now requiring inclusive AI.</div>
+                        </div>
+                        <div class="gap-box solution">
+                            <div class="gap-title">Trinity's LLM</div>
+                            <div class="gap-stat">200K+</div>
+                            <div class="gap-desc">Verified women of color health records. Only source in the world. Irreplaceable. Built with blockchain-verified consent.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why It Matters -->
+                <div class="success-metric" style="margin-top: 40px;">
+                    <strong>Why This Matters:</strong> Pharma companies are desperate for diverse AI training data. They spend $100M-$500M each building it themselves. Trinity's LLM is their only shortcut. Enterprise AI companies (Salesforce, LinkedIn, ADP) need bias correction. Healthcare AI startups need women of color data. They'll all pay premium prices.
+                </div>
+
+                <!-- Monetization Streams -->
+                <div style="margin-top: 50px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #c9a5b5; margin-bottom: 30px;">$30M+ Year 3 Revenue From 4 Streams</div>
+                    <div class="monetization-streams">
+                        <div class="stream-card">
+                            <div class="stream-icon">💊</div>
+                            <div class="stream-title">Pharma Licensing</div>
+                            <div class="stream-desc">Roche, Novartis, Merck, GSK license the LLM for drug development and clinical trial design</div>
+                            <div class="stream-value">$15-20M Year 3</div>
+                        </div>
+                        <div class="stream-card">
+                            <div class="stream-icon">🏥</div>
+                            <div class="stream-title">Medical Device/AI</div>
+                            <div class="stream-desc">AI medical devices need diverse performance validation for FDA approval</div>
+                            <div class="stream-value">$8-10M Year 3</div>
+                        </div>
+                        <div class="stream-card">
+                            <div class="stream-icon">🎯</div>
+                            <div class="stream-title">Enterprise Bias Correction</div>
+                            <div class="stream-desc">Salesforce, LinkedIn, ADP license for hiring AI de-biasing</div>
+                            <div class="stream-value">$5-8M Year 3</div>
+                        </div>
+                        <div class="stream-card">
+                            <div class="stream-icon">🔌</div>
+                            <div class="stream-title">LLM API Access</div>
+                            <div class="stream-desc">Healthcare platforms pay per API call for bias-corrected predictions</div>
+                            <div class="stream-value">$2-3M Year 3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-metric" style="margin-top: 40px;">
+                    <strong>The Thesis:</strong> Trinity isn't building one product. We're building an ecosystem that collects the world's most valuable dataset (via social network), owns it ethically (via HQ.AI), and monetizes it at enterprise scale (via proprietary LLM). This transforms us from healthcare fintech to AI infrastructure company.
+                </div>
+            </div>
+
+            <!-- Stage 6: Ecosystem Flywheel -->
+            <div class="stage-content stage-6">
+                <div class="stage-title">The Trinity Flywheel: The Moat</div>
+                <div class="stage-subtitle">
+                    Three separate products = $67M Year 3. Integrated ecosystem = $123M (84% uplift). But add the LLM monetization = $158M. Each new user makes ALL revenue streams exponentially more valuable.
+                </div>
+                <div class="flywheel">
+                    <div class="flywheel-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Woman Discovers FertilityFi</div>
+                            <div class="step-description">Needs $20K for IVF. Gets affordable stablecoin-backed loan.</div>
+                        </div>
+                    </div>
+                    <div class="flywheel-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Creates HQ.AI Identity</div>
+                            <div class="step-description">All clinical data encrypted in her vault. She owns it. Trinity can license it with her consent.</div>
+                        </div>
+                    </div>
+                    <div class="flywheel-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Joins Social Network</div>
+                            <div class="step-description">Finds treatment circles. Connects with 50+ women in same clinic. Emotional lock-in begins.</div>
+                        </div>
+                    </div>
+                    <div class="flywheel-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Trains the LLM</div>
+                            <div class="step-description">Every post, every outcome, every interaction = high-quality training data for proprietary AI model.</div>
+                        </div>
+                    </div>
+                    <div class="flywheel-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-title">Earns from Data</div>
+                            <div class="step-description">Pharma companies pay to license her clinical + behavioral data. She earns $100-$1,000 in stablecoins. Financial lock-in.</div>
+                        </div>
+                    </div>
+                    <div class="flywheel-step">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <div class="step-title">Trapped in Ecosystem</div>
+                            <div class="step-description">Can't leave. Financial (data earnings), emotional (community), ownership (portable but valuable). LTV: $10K-$50K.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="success-metric" style="margin-top: 40px;">
+                    <strong>Why It's Defensible:</strong> Competitors can build one or two of these pieces. Nobody can replicate all four. The LLM moat is what separates Trinity from every other fertility fintech.
+                </div>
+            </div>
+
+            <!-- Stage 7: Scale & LLM Revenue -->
+            <div class="stage-content stage-7">
+                <div class="stage-title">$158M Year 3: The LLM Changes Everything</div>
+                <div class="stage-subtitle">
+                    Previous model (without LLM): $123M Year 3. Adding proprietary LLM monetization: $158M Year 3. LLM becomes 20% of revenue by Year 3, growing to $100M+ annually by Year 5.
+                </div>
+                <div class="revenue-table">
+                    <div class="table-header">
+                        <div class="table-cell">Revenue Stream</div>
+                        <div class="table-cell">Year 1</div>
+                        <div class="table-cell">Year 3</div>
+                        <div class="table-cell">Year 5</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-label">FertilityFi Loans</div>
+                        <div class="table-value">$5.5M</div>
+                        <div class="table-value">$58M</div>
+                        <div class="table-value">$225M</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-label">Social Network</div>
+                        <div class="table-value">$2M</div>
+                        <div class="table-value">$37M</div>
+                        <div class="table-value">$210M</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-label">HQ.AI Protocol</div>
+                        <div class="table-value">$1.7M</div>
+                        <div class="table-value">$18M</div>
+                        <div class="table-value">$80M</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-label">Ecosystem Synergy</div>
+                        <div class="table-value">$0</div>
+                        <div class="table-value">$15M</div>
+                        <div class="table-value">$35M</div>
+                    </div>
+                    <div class="table-row highlight">
+                        <div class="table-label"><strong>Proprietary LLM</strong></div>
+                        <div class="table-value"><strong>$0</strong></div>
+                        <div class="table-value"><strong>$30M</strong></div>
+                        <div class="table-value"><strong>$100M+</strong></div>
+                    </div>
+                    <div class="table-row highlight">
+                        <div class="table-label"><strong>TOTAL REVENUE</strong></div>
+                        <div class="table-value"><strong>$9.2M</strong></div>
+                        <div class="table-value"><strong>$158M</strong></div>
+                        <div class="table-value"><strong>$650M+</strong></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 50px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #c9a5b5; margin-bottom: 30px;">Why This Wins</div>
+                    <div class="flywheel">
+                        <div class="flywheel-step">
+                            <div class="step-number" style="background: #4ade80;">✓</div>
+                            <div class="step-content">
+                                <div class="step-title">Proven Unit Economics</div>
+                                <div class="step-description">Nedbank fertility loan: 40% YoY growth, 8% NPL rate, positive contribution margin from day 1. Not venture speculation.</div>
+                            </div>
+                        </div>
+                        <div class="flywheel-step">
+                            <div class="step-number" style="background: #4ade80;">✓</div>
+                            <div class="step-content">
+                                <div class="step-title">Defensible LLM Moat</div>
+                                <div class="step-description">Only source of women of color health training data. Pharma, healthcare AI, enterprise all depend on Trinity eventually. Regulatory tailwind (FDA requiring diverse AI).</div>
+                            </div>
+                        </div>
+                        <div class="flywheel-step">
+                            <div class="step-number" style="background: #4ade80;">✓</div>
+                            <div class="step-content">
+                                <div class="step-title">Multiple Revenue Streams</div>
+                                <div class="step-description">Fintech (loans), community (engagement), data (licensing), AI (enterprise). If one slows, others accelerate. Diversified growth.</div>
+                            </div>
+                        </div>
+                        <div class="flywheel-step">
+                            <div class="step-number" style="background: #4ade80;">✓</div>
+                            <div class="step-content">
+                                <div class="step-title">$5-10B Exit Window</div>
+                                <div class="step-description">Year 5: 1M+ users, $650M+ revenue, profitable. Targets: Stripe (payments), Salesforce (AI), healthcare PE.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">Trinity Ecosystem — Where Healthcare Financing Meets AI Infrastructure</div>
+            <button class="cta-button" onclick="alert('Comprehensive materials:\n• Full financial model with LLM projections\n• Unit economics breakdown\n• Regulatory strategy (MiCA + GENIUS)\n• Market opportunity analysis\n\nAvailable upon request.')">Request Full Deck</button>
+        </div>
+    </div>
+
+    <script>
+        function switchStage(index) {
+            document.querySelectorAll('.stage-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.stage-button').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.stage-content')[index].classList.add('active');
+            document.querySelectorAll('.stage-button')[index].classList.add('active');
+        }
+    </script>
+</body>
+</html>
